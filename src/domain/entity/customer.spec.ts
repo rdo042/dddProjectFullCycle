@@ -1,3 +1,5 @@
+import EventDispatcher from "../event/@shared/event-dispatcher";
+import SendEmailWhenCustomerAddressIsChangedHandler from "../event/customer/handler/send-email-when-customer-address-is-changed.handler";
 import Address from "./address";
 import Customer from "./customer";
 
@@ -70,5 +72,20 @@ describe("Customer unit tests", () => {
 
         customer.addRewardPoints(10);
         expect(customer.rewardPoints).toBe(20);
+    });
+
+    it("Should notify When Customer Address changed", () => {
+        
+        expect(() => {
+            const eventDispatcher = new EventDispatcher();
+            const eventHandler = new SendEmailWhenCustomerAddressIsChangedHandler();
+            const spyEventHandler = jest.spyOn(eventHandler, "handle");
+
+            const customer = new Customer("123", "Customer 1");
+            const address = new Address("Street 1", 1, "Zipcode 1", "City 1");
+            customer.changeAddress(address);
+
+        }).not.toThrowError("Problem in sent message to handler");
+
     });
 });

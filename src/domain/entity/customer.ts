@@ -1,3 +1,6 @@
+import EventDispatcher from "../event/@shared/event-dispatcher";
+import CustomerAddressChangedEvent from "../event/customer/customer-address-changed.event";
+import SendEmailWhenCustomerAddressIsChangedHandler from "../event/customer/handler/send-email-when-customer-address-is-changed.handler";
 import Address from "./address";
 
 export default class Customer {
@@ -50,7 +53,9 @@ export default class Customer {
 
     changeAddress(address: Address) {
         this._address = address;
+        this.sendChangedAddress();
         this.validate();
+        
     }
 
     activate() {
@@ -66,6 +71,23 @@ export default class Customer {
 
     addRewardPoints(points: number) {
         this._rewardPoints += points;
+    }
+
+    sendChangedAddress() {
+        try {
+            const eventDispatcher = new EventDispatcher();
+            const eventHandler = new SendEmailWhenCustomerAddressIsChangedHandler();
+
+            eventDispatcher.register("CustomerAddressChangedEvent", eventHandler);
+
+            const customerChangedEvent = new CustomerAddressChangedEvent({
+            customer: this
+            });
+
+            eventDispatcher.notify(customerChangedEvent);
+        } catch (error) {
+            throw new Error("Problem in sent message to handler");
+        }
     }
 
 }
